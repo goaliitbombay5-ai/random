@@ -1,0 +1,211 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Node {
+public:
+    int reservationID;
+    string passengerName;
+    string trainName;
+    int seatNo;
+    Node* next;
+
+    Node(int id, string name, string train, int seat) {
+        reservationID = id;
+        passengerName = name;
+        trainName = train;
+        seatNo = seat;
+        next = NULL;
+    }
+};
+
+class RailwaySystem {
+private:
+    Node* head;
+
+public:
+    RailwaySystem() {
+        head = NULL;
+    }
+
+    void insertReservation() {
+        int id, seat;
+        string name, train;
+
+        cout << "Enter Reservation ID: ";
+        cin >> id;
+        cin.ignore();
+
+        cout << "Enter Passenger Name: ";
+        getline(cin, name);
+
+        cout << "Enter Train Name: ";
+        getline(cin, train);
+
+        cout << "Enter Seat Number: ";
+        cin >> seat;
+
+        Node* newNode = new Node(id, name, train, seat);
+
+        if (head == NULL) {
+            head = newNode;
+        } else {
+            Node* temp = head;
+            while (temp->next != NULL)
+                temp = temp->next;
+            temp->next = newNode;
+        }
+        cout << "Reservation Added Successfully!\n";
+    }
+
+    void displayReservations() {
+        if (head == NULL) {
+            cout << "No Reservations Found.\n";
+            return;
+        }
+
+        Node* temp = head;
+        cout << "\n--- Reservation List ---\n";
+        while (temp != NULL) {
+            cout << "Reservation ID: " << temp->reservationID << endl;
+            cout << "Passenger Name: " << temp->passengerName << endl;
+            cout << "Train Name: " << temp->trainName << endl;
+            cout << "Seat Number: " << temp->seatNo << endl;
+            cout << "------------------------\n";
+            temp = temp->next;
+        }
+    }
+
+    void searchReservation() {
+        int id;
+        cout << "Enter Reservation ID to Search: ";
+        cin >> id;
+
+        Node* temp = head;
+
+        while (temp != NULL) {
+            if (temp->reservationID == id) {
+                cout << "\nReservation Found:\n";
+                cout << "Passenger Name: " << temp->passengerName << endl;
+                cout << "Train Name: " << temp->trainName << endl;
+                cout << "Seat Number: " << temp->seatNo << endl;
+                return;
+            }
+            temp = temp->next;
+        }
+        cout << "Reservation Not Found.\n";
+    }
+
+    void updateReservation() {
+        int id;
+        cout << "Enter Reservation ID to Update: ";
+        cin >> id;
+        cin.ignore();
+
+        Node* temp = head;
+
+        while (temp != NULL) {
+            if (temp->reservationID == id) {
+                cout << "Enter New Passenger Name: ";
+                getline(cin, temp->passengerName);
+
+                cout << "Enter New Train Name: ";
+                getline(cin, temp->trainName);
+
+                cout << "Enter New Seat Number: ";
+                cin >> temp->seatNo;
+
+                cout << "Reservation Updated Successfully!\n";
+                return;
+            }
+            temp = temp->next;
+        }
+        cout << "Reservation Not Found.\n";
+    }
+
+    void deleteReservation() {
+        int id;
+        cout << "Enter Reservation ID to Delete: ";
+        cin >> id;
+
+        if (head == NULL) {
+            cout << "No Reservations to Delete.\n";
+            return;
+        }
+
+        if (head->reservationID == id) {
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+            cout << "Reservation Deleted Successfully!\n";
+            return;
+        }
+
+        Node* current = head;
+        Node* previous = NULL;
+
+        while (current != NULL && current->reservationID != id) {
+            previous = current;
+            current = current->next;
+        }
+
+        if (current == NULL) {
+            cout << "Reservation Not Found.\n";
+        } else {
+            previous->next = current->next;
+            delete current;
+            cout << "Reservation Deleted Successfully!\n";
+        }
+    }
+
+    void sortReservations() {
+        if (head == NULL || head->next == NULL) {
+            cout << "Not enough reservations to sort.\n";
+            return;
+        }
+
+        for (Node* i = head; i->next != NULL; i = i->next) {
+            for (Node* j = i->next; j != NULL; j = j->next) {
+                if (i->reservationID > j->reservationID) {
+                    swap(i->reservationID, j->reservationID);
+                    swap(i->passengerName, j->passengerName);
+                    swap(i->trainName, j->trainName);
+                    swap(i->seatNo, j->seatNo);
+                }
+            }
+        }
+        cout << "Reservations Sorted by ID Successfully!\n";
+    }
+};
+
+int main() {
+    RailwaySystem system;
+    int choice;
+
+    do {
+        cout << "\n=== Railway Reservation System ===\n";
+        cout << "1. Insert Reservation\n";
+        cout << "2. Display Reservations\n";
+        cout << "3. Search Reservation\n";
+        cout << "4. Update Reservation\n";
+        cout << "5. Sort Reservations\n";
+        cout << "6. Delete Reservation\n";
+        cout << "7. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: system.insertReservation(); break;
+            case 2: system.displayReservations(); break;
+            case 3: system.searchReservation(); break;
+            case 4: system.updateReservation(); break;
+            case 5: system.sortReservations(); break;
+            case 6: system.deleteReservation(); break;
+            case 7: cout << "Exiting...\n"; break;
+            default: cout << "Invalid choice! Try again.\n";
+        }
+
+    } while (choice != 7);
+
+    return 0;
+}

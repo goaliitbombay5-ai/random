@@ -1,0 +1,122 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Aadhar {
+public:
+    long long number;
+    string name;
+    int age;
+
+    void readData() {
+        cout << "Enter Aadhar Number: ";
+        cin >> number;
+        cout << "Enter Name: ";
+        cin >> name;
+        cout << "Enter Age: ";
+        cin >> age;
+    }
+
+    void displayData() {
+        cout << "Aadhar Number: " << number << endl;
+        cout << "Name: " << name << endl;
+        cout << "Age: " << age << endl;
+        cout << "------------------------" << endl;
+    }
+};
+
+class AadharSystem {
+public:
+    Aadhar records[100];
+    int count;
+
+    AadharSystem() {
+        count = 0;
+    }
+
+    void insertRecord() {
+        if (count < 100) {
+            cout << "\n--- Add New Record ---\n";
+            records[count].readData();
+            count++;
+            cout << "Record Added Successfully!\n";
+        } else {
+            cout << "Storage Full! Cannot Add More.\n";
+        }
+    }
+
+    void displayRecords() {
+        if (count == 0) {
+            cout << "No Records Available.\n";
+            return;
+        }
+        cout << "\n--- Stored Aadhar Records ---\n";
+        for (int i = 0; i < count; i++) {
+            records[i].displayData();
+        }
+    }
+
+    void updateRecord() {
+        long long num;
+        cout << "Enter Aadhar Number to Update: ";
+        cin >> num;
+
+        for (int i = 0; i < count; i++) {
+            if (records[i].number == num) {
+                cout << "Enter New Name: ";
+                cin >> records[i].name;
+                cout << "Enter New Age: ";
+                cin >> records[i].age;
+                cout << "Record Updated Successfully!\n";
+                return;
+            }
+        }
+        cout << "Record Not Found!\n";
+    }
+
+    void deleteRecord() {
+        long long num;
+        cout << "Enter Aadhar Number to Delete: ";
+        cin >> num;
+
+        for (int i = 0; i < count; i++) {
+            if (records[i].number == num) {
+                for (int j = i; j < count - 1; j++) {
+                    records[j] = records[j + 1];
+                }
+                count--;
+                cout << "Record Deleted Successfully!\n";
+                return;
+            }
+        }
+        cout << "Record Not Found!\n";
+    }
+};
+
+int main() {
+    AadharSystem system;
+    int choice;
+
+    do {
+        cout << "\n=== Aadhar Card Management System ===\n";
+        cout << "1. Add Record\n";
+        cout << "2. Display Records\n";
+        cout << "3. Update Record\n";
+        cout << "4. Delete Record\n";
+        cout << "5. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: system.insertRecord(); break;
+            case 2: system.displayRecords(); break;
+            case 3: system.updateRecord(); break;
+            case 4: system.deleteRecord(); break;
+            case 5: cout << "Exiting...\n"; break;
+            default: cout << "Invalid choice! Try again.\n";
+        }
+
+    } while (choice != 5);
+
+    return 0;
+}

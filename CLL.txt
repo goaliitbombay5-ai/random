@@ -1,0 +1,132 @@
+#include <iostream>
+using namespace std;
+
+class Node {
+public:
+    int orderNo;
+    Node* next;
+
+    Node(int o) {
+        orderNo = o;
+        next = NULL;
+    }
+};
+
+class PizzaParlor {
+private:
+    Node* front;
+    Node* rear;
+    int maxOrders;
+    int count;
+
+public:
+    PizzaParlor(int m) {
+        front = rear = NULL;
+        maxOrders = m;
+        count = 0;
+    }
+
+    // Place new order
+    void placeOrder(int orderNo) {
+        if (count == maxOrders) {
+            cout << "No more orders accepted! Parlor is full.\n";
+            return;
+        }
+
+        Node* newNode = new Node(orderNo);
+
+        if (front == NULL) {   // first order
+            front = rear = newNode;
+            rear->next = front;
+        } else {
+            rear->next = newNode;
+            newNode->next = front;
+            rear = newNode;
+        }
+
+        count++;
+        cout << "Order " << orderNo << " placed successfully!\n";
+    }
+
+    // Serve (remove) first order
+    void serveOrder() {
+        if (front == NULL) {
+            cout << "No pending orders!\n";
+            return;
+        }
+
+        cout << "Order " << front->orderNo << " served.\n";
+
+        if (front == rear) {  // only one node
+            delete front;
+            front = rear = NULL;
+        } else {
+            Node* temp = front;
+            front = front->next;
+            rear->next = front;
+            delete temp;
+        }
+
+        count--;
+    }
+
+    // Show all pending orders
+    void displayOrders() {
+        if (front == NULL) {
+            cout << "No pending orders!\n";
+            return;
+        }
+
+        cout << "Pending Orders: ";
+        Node* temp = front;
+        do {
+            cout << temp->orderNo << " ";
+            temp = temp->next;
+        } while (temp != front);
+        cout << endl;
+    }
+};
+
+int main() {
+    int M;
+    cout << "Enter maximum number of orders Pizza Parlor can accept: ";
+    cin >> M;
+
+    PizzaParlor p(M);
+    int choice, orderNo;
+
+    do {
+        cout << "\n=== Pizza Parlor Order System ===\n";
+        cout << "1. Place Order\n";
+        cout << "2. Serve Order\n";
+        cout << "3. Display Pending Orders\n";
+        cout << "4. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch(choice) {
+            case 1:
+                cout << "Enter Order Number: ";
+                cin >> orderNo;
+                p.placeOrder(orderNo);
+                break;
+
+            case 2:
+                p.serveOrder();
+                break;
+
+            case 3:
+                p.displayOrders();
+                break;
+
+            case 4:
+                cout << "Thank you! Exiting...\n";
+                break;
+
+            default:
+                cout << "Invalid choice! Try again.\n";
+        }
+    } while(choice != 4);
+
+    return 0;
+}

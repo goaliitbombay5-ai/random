@@ -1,0 +1,221 @@
+#include <iostream>
+#include <string>
+#include <bits/stdc++.h>
+#define size 1000
+using namespace std;
+
+class Stack {
+public:
+    string stack[size];
+    int top;
+
+    Stack() { top = -1; }
+
+    bool isFull() { return top == size - 1; }
+
+    bool isEmpty() { return top == -1; }
+
+    void push(string s) {
+        if (isFull())
+            cout << "\nStack is Full" << endl;
+        else
+            stack[++top] = s;
+    }
+
+    string pop() {
+        if (isEmpty()) {
+            cout << "\nStack is Empty" << endl;
+            return "";
+        } else {
+            return stack[top--];
+        }
+    }
+};
+
+class expression {
+public:
+    string post, pre, in;
+    Stack s;
+
+    bool isOperator(char x) {
+        return (x == '+' || x == '-' || x == '*' || x == '/' || x == '^');
+    }
+
+    int prec(string op) {
+        if (op == "+" || op == "-")
+            return 1;
+        else if (op == "*" || op == "/")
+            return 2;
+        else if (op == "^")
+            return 3;
+        else
+            return 0;
+    }
+
+    // ? INFIX ? POSTFIX
+    void in_to_post() {
+        cout << "\nEnter the infix expression: ";
+        cin >> in;
+        post = "";
+
+        for (int i = 0; i < in.length(); i++) {
+            if ((in[i] >= 'a' && in[i] <= 'z') || (in[i] >= 'A' && in[i] <= 'Z') || isdigit(in[i])) {
+                post += in[i];
+            } else if (in[i] == '(') {
+                s.push("(");
+            } else if (in[i] == ')') {
+                while ((!s.isEmpty()) && s.stack[s.top] != "(") {
+                    post += s.pop();
+                }
+                if (!s.isEmpty()) s.pop(); // remove '('
+            } else {
+                while ((!s.isEmpty()) && prec(string(1, in[i])) <= prec(s.stack[s.top])) {
+                    post += s.pop();
+                }
+                s.push(string(1, in[i]));
+            }
+        }
+        while (!s.isEmpty()) {
+            post += s.pop();
+        }
+        cout << "\nInfix Expression: " << in;
+        cout << "\nPostfix Expression: " << post << endl;
+    }
+
+    // ? POSTFIX ? PREFIX
+    void post_to_pre() {
+        cout << "\nEnter the postfix expression: ";
+        cin >> post;
+        pre = "";
+
+        for (int i = 0; i < post.length(); i++) {
+            if (isOperator(post[i])) {
+                string op2 = s.pop();
+                string op1 = s.pop();
+                string temp = post[i] + op1 + op2;
+                s.push(temp);
+            } else {
+                s.push(string(1, post[i]));
+            }
+        }
+        pre = s.pop();
+        cout << "\nPostfix Expression: " << post;
+        cout << "\nPrefix Expression: " << pre << endl;
+    }
+
+    // ? POSTFIX EVALUATION
+    void post_eva() {
+        cout << "\nEnter the postfix expression to evaluate: ";
+        cin >> post;
+        cout << "\nPostfix Expression: " << post;
+        cout << "\nAnswer: ";
+
+        for (int i = 0; i < post.length(); i++) {
+            if (isOperator(post[i])) {
+                int op1, op2, ans;
+                string op2_str = s.pop();
+                string op1_str = s.pop();
+                stringstream stm1(op1_str), stm2(op2_str);
+                stm1 >> op1;
+                stm2 >> op2;
+
+                switch (post[i]) {
+                    case '+': ans = op1 + op2; break;
+                    case '-': ans = op1 - op2; break;
+                    case '*': ans = op1 * op2; break;
+                    case '/': ans = op1 / op2; break;
+                    case '^': ans = pow(op1, op2); break;
+                }
+
+                stringstream stm3;
+                stm3 << ans;
+                s.push(stm3.str());
+            } else if (isdigit(post[i])) {
+                s.push(string(1, post[i]));
+            }
+        }
+        cout << s.pop() << endl;
+    }
+
+    // ? INFIX ? PREFIX
+    void in_to_pre() {
+        cout << "\nEnter the infix expression: ";
+        cin >> in;
+        pre = "";
+        string rev = in;
+        reverse(rev.begin(), rev.end());
+
+        // reverse brackets
+        for (int i = 0; i < rev.length(); i++) {
+            if (rev[i] == '(')
+                rev[i] = ')';
+            else if (rev[i] == ')')
+                rev[i] = '(';
+        }
+
+        // convert reversed infix to postfix
+        string postfix = "";
+        for (int i = 0; i < rev.length(); i++) {
+            if ((rev[i] >= 'a' && rev[i] <= 'z') || (rev[i] >= 'A' && rev[i] <= 'Z') || isdigit(rev[i])) {
+                postfix += rev[i];
+            } else if (rev[i] == '(') {
+                s.push("(");
+            } else if (rev[i] == ')') {
+                while ((!s.isEmpty()) && s.stack[s.top] != "(") {
+                    postfix += s.pop();
+                }
+                if (!s.isEmpty()) s.pop();
+            } else {
+                while ((!s.isEmpty()) && prec(string(1, rev[i])) < prec(s.stack[s.top])) {
+                    postfix += s.pop();
+                }
+                s.push(string(1, rev[i]));
+            }
+        }
+        while (!s.isEmpty())
+            postfix += s.pop();
+
+        reverse(postfix.begin(), postfix.end());
+        pre = postfix;
+
+        cout << "\nInfix Expression: " << in;
+        cout << "\nPrefix Expression: " << pre << endl;
+    }
+};
+
+int main() {
+    expression ob1;
+    int ch;
+    do {
+        cout << "\n==============================";
+        cout << "\n1. Infix to Postfix Conversion";
+        cout << "\n2. Postfix to Prefix Conversion";
+        cout << "\n3. Postfix Evaluation";
+        cout << "\n4. Infix to Prefix Conversion";
+        cout << "\n5. Exit";
+        cout << "\nEnter your choice: ";
+        cin >> ch;
+
+        switch (ch) {
+            case 1:
+                ob1.in_to_post();
+                break;
+            case 2:
+                ob1.post_to_pre();
+                break;
+            case 3:
+                ob1.post_eva();
+                break;
+            case 4:
+                ob1.in_to_pre();
+                break;
+            case 5:
+                cout << "Exiting program..." << endl;
+                break;
+            default:
+                cout << "Invalid choice! Try again.\n";
+        }
+    } while (ch != 5);
+    return 0;
+}
+

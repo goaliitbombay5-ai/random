@@ -1,0 +1,212 @@
+#include <iostream>
+using namespace std;
+
+// Node of doubly linked list
+class Node {
+public:
+    int marks;
+    Node* prev;
+    Node* next;
+
+    Node(int m) {
+        marks = m;
+        prev = NULL;
+        next = NULL;
+    }
+};
+
+// Doubly linked list class
+class DoublyList {
+private:
+    Node* head;
+    Node* tail;
+
+public:
+    DoublyList() {
+        head = NULL;
+        tail = NULL;
+    }
+
+    Node* getHead() {
+        return head;
+    }
+
+    // Insert at end O(1)
+    void insertEnd(int m) {
+        Node* newNode = new Node(m);
+
+        if (head == NULL) {
+            head = tail = newNode;
+            return;
+        }
+
+        tail->next = newNode;
+        newNode->prev = tail;
+        tail = newNode;
+    }
+
+    // Display list
+    void display() {
+        if (head == NULL) {
+            cout << "List is empty.\n";
+            return;
+        }
+        Node* temp = head;
+        while (temp != NULL) {
+            cout << temp->marks << " ";
+            temp = temp->next;
+        }
+        cout << endl;
+    }
+
+    // Simple bubble sort
+    void sortList() {
+        if (head == NULL || head->next == NULL)
+            return;
+
+        bool swapped;
+        do {
+            swapped = false;
+            Node* temp = head;
+            while (temp->next != NULL) {
+                if (temp->marks > temp->next->marks) {
+                    int t = temp->marks;
+                    temp->marks = temp->next->marks;
+                    temp->next->marks = t;
+                    swapped = true;
+                }
+                temp = temp->next;
+            }
+        } while (swapped);
+    }
+};
+
+// Merge two sorted linked lists
+Node* mergeSorted(Node* head1, Node* head2) {
+    Node* mergedHead = NULL;
+    Node* mergedTail = NULL;
+
+    while (head1 != NULL && head2 != NULL) {
+        int value;
+        if (head1->marks <= head2->marks) {
+            value = head1->marks;
+            head1 = head1->next;
+        } else {
+            value = head2->marks;
+            head2 = head2->next;
+        }
+
+        Node* newNode = new Node(value);
+
+        if (mergedHead == NULL) {
+            mergedHead = mergedTail = newNode;
+        } else {
+            mergedTail->next = newNode;
+            newNode->prev = mergedTail;
+            mergedTail = newNode;
+        }
+    }
+
+    // remaining nodes of list1
+    while (head1 != NULL) {
+        Node* newNode = new Node(head1->marks);
+        mergedTail->next = newNode;
+        newNode->prev = mergedTail;
+        mergedTail = newNode;
+        head1 = head1->next;
+    }
+
+    // remaining nodes of list2
+    while (head2 != NULL) {
+        Node* newNode = new Node(head2->marks);
+        mergedTail->next = newNode;
+        newNode->prev = mergedTail;
+        mergedTail = newNode;
+        head2 = head2->next;
+    }
+
+    return mergedHead;
+}
+
+// Main menu driven program
+int main() {
+    DoublyList list1, list2, mergedList;
+    int choice, marks;
+
+    do {
+        cout << "\n=== Technical Skill Exam Marks System ===\n";
+        cout << "1. Insert Marks into List 1\n";
+        cout << "2. Insert Marks into List 2\n";
+        cout << "3. Display List 1\n";
+        cout << "4. Display List 2\n";
+        cout << "5. Sort List 1\n";
+        cout << "6. Sort List 2\n";
+        cout << "7. Merge Sorted Lists\n";
+        cout << "8. Display Merged List\n";
+        cout << "9. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter marks: ";
+                cin >> marks;
+                list1.insertEnd(marks);
+                break;
+
+            case 2:
+                cout << "Enter marks: ";
+                cin >> marks;
+                list2.insertEnd(marks);
+                break;
+
+            case 3:
+                cout << "List 1: ";
+                list1.display();
+                break;
+
+            case 4:
+                cout << "List 2: ";
+                list2.display();
+                break;
+
+            case 5:
+                list1.sortList();
+                cout << "List 1 sorted!\n";
+                break;
+
+            case 6:
+                list2.sortList();
+                cout << "List 2 sorted!\n";
+                break;
+
+            case 7: {
+                Node* mergedHead = mergeSorted(list1.getHead(), list2.getHead());
+            //    mergedList = DoublyList();    // reset merged list
+            
+                Node* temp = mergedHead;
+                while (temp != NULL) {
+                    mergedList.insertEnd(temp->marks);
+                    temp = temp->next;
+                }
+                cout << "Lists merged successfully!\n";
+                break;
+            }
+
+            case 8:
+                cout << "Merged List: ";
+                mergedList.display();
+                break;
+
+            case 9:
+                cout << "Exiting...\n";
+                break;
+
+            default:
+                cout << "Invalid Choice! Try again.\n";
+        }
+
+    } while (choice != 9);
+
+    return 0;
+}

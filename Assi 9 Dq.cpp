@@ -1,0 +1,210 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+#define MAX_SIZE 25
+
+class Deque {
+    int array[MAX_SIZE];
+    int front;
+    int rear;
+    int size;
+
+public:
+    Deque(int size) {
+        front = -1;
+        rear = 0;
+        this->size = size;
+    }
+
+    void insertFront(int key);
+    void insertRear(int key);
+    void deleteFront();
+    void deleteRear();
+    int getFront();
+    int getRear();
+    bool isFull();
+    bool isEmpty();
+    void display();
+};
+
+bool Deque::isFull() {
+    return ((front == 0 && rear == size - 1) || (front == rear + 1));
+}
+
+bool Deque::isEmpty() {
+    return (front == -1);
+}
+
+void Deque::insertFront(int key) {
+    if (isFull()) {
+        cout << "Queue full! No more customers can enter.\n";
+        return;
+    }
+
+    if (front == -1) {
+        front = 0;
+        rear = 0;
+    } else if (front == 0)
+        front = size - 1;
+    else
+        front = front - 1;
+
+    array[front] = key;
+    cout << "VIP Customer " << key << " entered at the front.\n";
+}
+
+void Deque::insertRear(int key) {
+    if (isFull()) {
+        cout << "Queue full! No more customers can enter.\n";
+        return;
+    }
+
+    if (front == -1) {
+        front = 0;
+        rear = 0;
+    } else if (rear == size - 1)
+        rear = 0;
+    else
+        rear = rear + 1;
+
+    array[rear] = key;
+    cout << "Customer " << key << " joined the queue at the rear.\n";
+}
+
+void Deque::deleteFront() {
+    if (isEmpty()) {
+        cout << "No customers in queue.\n";
+        return;
+    }
+
+    cout << "Customer " << array[front] << " finished billing and left.\n";
+
+    if (front == rear) {
+        front = -1;
+        rear = -1;
+    } else if (front == size - 1)
+        front = 0;
+    else
+        front = front + 1;
+}
+
+void Deque::deleteRear() {
+    if (isEmpty()) {
+        cout << "No customers in queue.\n";
+        return;
+    }
+
+    cout << "Customer " << array[rear] << " left without shopping.\n";
+
+    if (front == rear) {
+        front = -1;
+        rear = -1;
+    } else if (rear == 0)
+        rear = size - 1;
+    else
+        rear = rear - 1;
+}
+
+int Deque::getFront() {
+    if (isEmpty()) {
+        cout << "No customers in queue.\n";
+        return -1;
+    }
+    return array[front];
+}
+
+int Deque::getRear() {
+    if (isEmpty()) {
+        cout << "No customers in queue.\n";
+        return -1;
+    }
+    return array[rear];
+}
+
+void Deque::display() {
+    if (isEmpty()) {
+        cout << "Queue is empty.\n";
+        return;
+    }
+
+    cout << "Current customers in queue: ";
+    int i = front;
+    while (true) {
+        cout << array[i] << " ";
+        if (i == rear)
+            break;
+        i = (i + 1) % size;
+    }
+    cout << endl;
+}
+
+// ===============================
+//        MAIN PROGRAM
+// ===============================
+int main() {
+    int n;
+    cout << "Enter the maximum number of customers allowed in the queue: ";
+    cin >> n;
+    if (n > MAX_SIZE || n <= 0) {
+        cout << "Invalid size! Using default (5).\n";
+        n = 5;
+    }
+
+    Deque mallQueue(n);
+    int choice, id;
+
+    do {
+        cout << "\n====== Shopping Mall Queue Menu ======\n";
+        cout << "1. New customer enters (rear)\n";
+        cout << "2. VIP customer enters (front)\n";
+        cout << "3. Customer billed and leaves (front)\n";
+        cout << "4. Customer leaves without shopping (rear)\n";
+        cout << "5. Show next customer to bill\n";
+        cout << "6. Show last customer in line\n";
+        cout << "7. Display current queue\n";
+        cout << "0. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter Customer ID: ";
+                cin >> id;
+                mallQueue.insertRear(id);
+                break;
+            case 2:
+                cout << "Enter VIP Customer ID: ";
+                cin >> id;
+                mallQueue.insertFront(id);
+                break;
+            case 3:
+                mallQueue.deleteFront();
+                break;
+            case 4:
+                mallQueue.deleteRear();
+                break;
+            case 5:
+                id = mallQueue.getFront();
+                if (id != -1)
+                    cout << "Next to bill: Customer " << id << endl;
+                break;
+            case 6:
+                id = mallQueue.getRear();
+                if (id != -1)
+                    cout << "Last in line: Customer " << id << endl;
+                break;
+            case 7:
+                mallQueue.display();
+                break;
+            case 0:
+                cout << "Mall closing! Exiting...\n";
+                break;
+            default:
+                cout << "Invalid choice! Try again.\n";
+        }
+
+    } while (choice != 0);
+
+    return 0;
+}

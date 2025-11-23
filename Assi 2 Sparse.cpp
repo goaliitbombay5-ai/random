@@ -1,0 +1,235 @@
+#include <iostream>
+using namespace std;
+
+class SparseMatrix {
+    int matrix[10][10];
+    int rows, cols;
+    int sparse[100][3]; // [row, col, value]
+    int nonZero;
+
+public:
+    void acceptMatrix();
+    void convertToSparse();
+    void displaySparse();
+    void fastTranspose(int result[100][3]);
+    void add(SparseMatrix &s2);
+    void multiply(SparseMatrix &s2);
+};
+
+void SparseMatrix::acceptMatrix() {
+    cout << "Enter number of rows and columns: ";
+    cin >> rows >> cols;
+    nonZero = 0;
+
+    cout << "Enter matrix elements:\n";
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            cin >> matrix[i][j];
+            if (matrix[i][j] != 0)
+                nonZero++;
+        }
+    }
+}
+
+void SparseMatrix::convertToSparse() {
+    sparse[0][0] = rows;
+    sparse[0][1] = cols;
+    sparse[0][2] = nonZero;
+
+    int k = 1;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (matrix[i][j] != 0) {
+                sparse[k][0] = i;
+                sparse[k][1] = j;
+                sparse[k][2] = matrix[i][j];
+                k++;
+            }
+        }
+    }
+}
+
+void SparseMatrix::displaySparse() {
+    cout << "\nSparse Matrix (row col value):\n";
+    for (int i = 0; i <= sparse[0][2]; i++) {
+        cout << sparse[i][0] << " " << sparse[i][1] << " " << sparse[i][2] << "\n";
+    }
+}
+
+void SparseMatrix::fastTranspose(int result[100][3]) {
+    int totalCols = sparse[0][1];
+    int totalTerms = sparse[0][2];
+
+    result[0][0] = totalCols;
+    result[0][1] = sparse[0][0];
+    result[0][2] = totalTerms;
+
+    int total[100] = {0};
+    for (int i = 1; i <= totalTerms; i++) {
+        total[sparse[i][1]]++;
+    }
+
+    int index[100];
+    index[0] = 1;
+    for (int i = 1; i < totalCols; i++) {
+        index[i] = index[i - 1] + total[i - 1];
+    }
+
+    for (int i = 1; i <= totalTerms; i++) {
+        int col = sparse[i][1];
+        int pos = index[col];
+
+        result[pos][0] = sparse[i][1];
+        result[pos][1] = sparse[i][0];
+        result[pos][2] = sparse[i][2];
+
+        index[col]++;
+    }
+}
+
+void SparseMatrix::add(SparseMatrix &s2) {
+    if (sparse[0][0] != s2.sparse[0][0] || sparse[0][1] != s2.sparse[0][1]) {
+        cout << "\nMatrix dimensions do not match for addition!\n";
+        return;
+    }
+
+    int result[100][3];
+    int i = 1, j = 1, k = 1;
+    result[0][0] = sparse[0][0];
+    result[0][1] = sparse[0][1];
+
+    while (i <= sparse[0][2] && j <= s2.sparse[0][2]) {
+        if (sparse[i][0] < s2.sparse[j][0] ||
+            (sparse[i][0] == s2.sparse[j][0] && sparse[i][1] < s2.sparse[j][1])) {
+            result[k][0] = sparse[i][0];
+            result[k][1] = sparse[i][1];
+            result[k][2] = sparse[i][2];
+            i++;
+        }
+        else if (sparse[i][0] > s2.sparse[j][0] ||
+                 (sparse[i][0] == s2.sparse[j][0] && sparse[i][1] > s2.sparse[j][1])) {
+            result[k][0] = s2.sparse[j][0];
+            result[k][1] = s2.sparse[j][1];
+            result[k][2] = s2.sparse[j][2];
+            j++;
+        }
+        else {
+            result[k][0] = sparse[i][0];
+            result[k][1] = sparse[i][1];
+            result[k][2] = sparse[i][2] + s2.sparse[j][2];
+            i++;
+            j++;
+        }
+        k++;
+    }
+
+    while (i <= sparse[0][2]) {
+        result[k][0] = sparse[i][0];
+        result[k][1] = sparse[i][1];
+        result[k][2] = sparse[i][2];
+        i++;
+        k++;
+    }
+    while (j <= s2.sparse[0][2]) {
+        result[k][0] = s2.sparse[j][0];
+        result[k][1] = s2.sparse[j][1];
+        result[k][2] = s2.sparse[j][2];
+        j++;
+        k++;
+    }
+
+    result[0][2] = k - 1;
+
+    cout << "\n----Addition Result (Sparse): ----\n";
+    for (int t = 0; t < k; t++) {
+        cout << result[t][0] << " " << result[t][1] << " " << result[t][2] << "\n";
+    }
+}
+
+void SparseMatrix::multiply(SparseMatrix &s2) {
+    if (sparse[0][1] != s2.sparse[0][0]) {
+        cout << "\nMatrix dimensions do not match for multiplication!\n";
+        return;
+    }
+
+    int transB[100][3];
+    s2.fastTranspose(transB);
+
+    int result[100][3];
+    result[0][0] = sparse[0][0];
+    result[0][1] = s2.sparse[0][1];
+    int k = 1;
+
+    for (int i = 1; i <= sparse[0][2]; i++) {
+        for (int j = 1; j <= transB[0][2]; j++) {
+            if (sparse[i][1] == transB[j][1]) {
+                int row = sparse[i][0];
+                int col = transB[j][0];
+                int value = sparse[i][2] * transB[j][2];
+
+                // check if already exists in result
+                int found = 0;
+                for (int x = 1; x < k; x++) {
+                    if (result[x][0] == row && result[x][1] == col) {
+                        result[x][2] += value;
+                        found = 1;
+                        break;
+                    }
+                }
+                if (!found && value != 0) {
+                    result[k][0] = row;
+                    result[k][1] = col;
+                    result[k][2] = value;
+                    k++;
+                }
+            }
+        }
+    }
+
+    result[0][2] = k - 1;
+
+    cout << "\n----Multiplication Result (Sparse): ----\n";
+    for (int i = 0; i < k; i++) {
+        cout << result[i][0] << " " << result[i][1] << " " << result[i][2] << "\n";
+    }
+}
+
+int main() {
+    SparseMatrix m1, m2;
+
+    cout << "First Matrix:\n";
+    m1.acceptMatrix();
+    m1.convertToSparse();
+    m1.displaySparse();
+
+    cout << "\nSecond Matrix:\n";
+    m2.acceptMatrix();
+    m2.convertToSparse();
+    m2.displaySparse();
+
+    // Addition
+    m1.add(m2);
+
+    // Multiplication
+    m1.multiply(m2);
+
+    // Fast transpose of first matrix
+    int trans[100][3];
+    m1.fastTranspose(trans);
+
+    cout << "\n----Fast Transpose of First Matrix:----\n";
+    for (int i = 0; i <= trans[0][2]; i++) {
+        cout << trans[i][0] << " " << trans[i][1] << " " << trans[i][2] << "\n";
+    }
+    
+    // Fast transpose of second matrix
+    int trans2[100][3];
+	    m2.fastTranspose(trans2);
+	
+	    cout << "\n----Fast Transpose of Second Matrix: ----\n";
+	    for (int i = 0; i <= trans2[0][2]; i++) {
+	        cout << trans2[i][0] << " " << trans2[i][1] << " " << trans2[i][2] << "\n";
+	    }
+
+    return 0;
+}

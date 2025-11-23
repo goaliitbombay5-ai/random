@@ -1,0 +1,68 @@
+#include <iostream>
+#include <stack>
+#include <cmath>
+using namespace std;
+class Queen {
+public:
+    int row, col;
+    Queen(int r, int c) { row = r; col = c; }
+};
+bool isSafe(stack<Queen> st, int row, int col) {
+    while (!st.empty()) {
+        Queen q = st.top();
+        st.pop();
+        if (q.col == col || abs(q.row - row) == abs(q.col - col))
+            return false;
+    }
+    return true;
+}
+int main() {
+    stack<Queen> st;
+    int row = 0, col = 0;
+    int boardSize = 8;
+    bool found = false;
+    while (true){
+        while (col < boardSize) {
+            if (isSafe(st, row, col)) {
+                st.push(Queen(row, col));
+                row++;
+                col = 0;//reset for next row
+                break;
+            } else {
+                col++;
+            }
+        }
+        //If a full solution is found
+        if (row == boardSize) {
+            found = true;
+            break;
+        }
+        //if no column safe,backtrack
+        if (col >= boardSize){
+            if (st.empty()) break;//no more sols
+            Queen last = st.top();
+            st.pop();
+            row = last.row;
+            col = last.col + 1;
+        }
+    }
+    if (found) {
+        cout << "Solution to 8 Queens Problem:\n\n";
+        int board[8][8] = {0};
+        while (!st.empty()) {
+            Queen q = st.top();
+            board[q.row][q.col] = 1;
+            st.pop();
+        }
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                cout << (board[i][j] ? "Q " : ". ");
+            }
+            cout << endl;
+        }
+    } else {
+        cout << "No solution found.\n";
+    }
+
+    return 0;
+}
